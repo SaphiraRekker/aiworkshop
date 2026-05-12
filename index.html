@@ -807,9 +807,28 @@ Working preferences:
       <text x="587" y="58" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9999bb">Inexperienced RA → Postdoc</text>
     </svg>
   </div>
+  <div class="foundation" style="margin-bottom:20px;">
+    <h2>📄 The documents used in this demo</h2>
+    <p style="font-size:0.88rem; color:var(--stone); margin-bottom:14px;">These are the four guidance documents uploaded in Prompt 1. Download them to follow along or use for your own application:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <a href="DProg Fellowships Detailed Assessor Handbook – FT26 and DE27.pdf" target="_blank" style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg); border:1px solid var(--rule); border-radius:4px; text-decoration:none; color:var(--ink); font-size:0.85rem;">
+        <span style="font-size:1.2rem;">📋</span> Detailed Assessor Handbook
+      </a>
+      <a href="FT26_Instructions-to-Applicants.pdf" target="_blank" style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg); border:1px solid var(--rule); border-radius:4px; text-decoration:none; color:var(--ink); font-size:0.85rem;">
+        <span style="font-size:1.2rem;">📋</span> Instructions to Applicants
+      </a>
+      <a href="NITWritingGuide_V4.pdf" target="_blank" style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg); border:1px solid var(--rule); border-radius:4px; text-decoration:none; color:var(--ink); font-size:0.85rem;">
+        <span style="font-size:1.2rem;">📋</span> NIT Writing Guide
+      </a>
+      <a href="UQ R&I How to Guide_FT26_v2.pdf" target="_blank" style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg); border:1px solid var(--rule); border-radius:4px; text-decoration:none; color:var(--ink); font-size:0.85rem;">
+        <span style="font-size:1.2rem;">📋</span> UQ R&I How-to Guide
+      </a>
+    </div>
+  </div>
+
   <div class="prompt-card" style="margin-bottom:16px">
     <div class="prompt-card-header">
-      <span class="prompt-label">Prompt 1, Upload the rules docs, ask Claude to synthesise</span>
+      <span class="prompt-label">Prompt 1 — Upload the rules docs, ask Claude to synthesise</span>
       <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
     </div>
     <div class="prompt-text">"I'm starting an ARC Future Fellowship application (UQ-FT26). I've attached four guidance documents: the Detailed Assessor Handbook, Instructions to Applicants, NIT Writing Guide, and UQ How-to Guide. Read all four and produce a concise rules document I can save and reuse for every chat in this project. Cover: assessment criteria with weights, section requirements with character limits, NIT guidance, and any UQ-specific rules. Ask me anything you need clarified before producing it."</div>
@@ -1003,15 +1022,41 @@ Please ask me questions on where the platform is at, anything you need to help w
     </svg>
   </div>
 
-  <div class="try-it" style="margin-bottom:28px">
-    <h3>🎯 The actual prompt that started it</h3>
-    <p style="font-style:italic; margin-top:8px">"ok so I am presenting tomorrow to the 'team', it will include a new research assistant who knows NOTHING about this field. We need two slides/diagrams, 1 very very simple to a layman what we are doing and why, then get into the details of who is doing what. We can also have a little abstract or diagram of all the papers we are working on. Like one of my PhD students is writing her first essay on what tools are being used (I think I have a project on her stuff? or how is it best to share her latest version and where can we track?"</p>
-    <p style="margin-top:12px">One line. No specification of format, colours, interactivity, or structure. The reason it worked: <strong>the Project already contained the DECRA materials, the Future Fellowship project description, the ROPE, and the NCC comment.</strong> A short prompt only works because the context was already loaded. Without that, Claude would have asked basic questions instead of drafting.</p>
+  <div class="prompt-card" style="margin-bottom:16px">
+    <div class="prompt-card-header">
+      <span class="prompt-label">The prompt</span>
+      <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+    </div>
+    <div class="prompt-text">"ok so I am presenting tomorrow to the 'team', it will include a new research assistant who knows NOTHING about this field. We need two slides/diagrams, 1 very very simple to a layman what we are doing and why, then get into the details of who is doing what. We can also have a little abstract or diagram of all the papers we are working on. Like one of my PhD students is writing her first essay on what tools are being used (I think I have a project on her stuff? or how is it best to share her latest version and where can we track?"</div>
   </div>
 
-  <div class="try-it" style="margin-bottom:28px;">
-    <h3>💬 What happened next</h3>
-    <p>"The first version was React, which Claude does by default. Sharing it with the team turned out to be harder than the building. We tried StackBlitz URLs that didn't work, hit dead ends, and eventually built a standalone HTML version as a backup. The HTML version was what actually got used. The lesson isn't 'Claude picked the right format' — the lesson is 'have a sharing fallback because the fancy option often breaks.'"</p>
+  <div class="foundation" style="margin-bottom:28px;">
+    <p>Four sentences. No specification of format, colours, interactivity, or structure, and yet Claude produced a three-slide interactive React presentation, colour-coded by research stream, with clickable boxes that revealed research questions. The reason it worked: the Project already contained the DECRA application, the Future Fellowship project description, the ROPE, the NCC comment, and the publication list. All of that context loaded silently before the prompt was even typed. Without it, the same four sentences would have produced something generic that needed correcting from scratch. Short prompts don't save time, they only work when the groundwork is already there.</p>
+  </div>
+
+  <div class="prompts-grid" style="margin-bottom:16px;">
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <span class="prompt-label">Then a correction...</span>
+      </div>
+      <div class="prompt-text">"NGFS 2C, >2C is not a priority, national context comes first!"</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <span class="prompt-label">And another...</span>
+      </div>
+      <div class="prompt-text">"should we actually maybe move from bottom to top... like start with platform and then go into the ingredients we need..."</div>
+    </div>
+  </div>
+
+  <div class="foundation" style="margin-bottom:20px;">
+    <p>Many iterations later...</p>
+  </div>
+
+  <div class="try-it" style="margin-bottom:28px; text-align:center;">
+    <h3>The result</h3>
+    <p style="margin-bottom:14px;">Three interactive slides: Big Picture / Who Does What / Our Papers.</p>
+    <a href="cbt_presentation-tracker.html" target="_blank" style="display:inline-block; background:var(--clay); color:white; padding:12px 28px; border-radius:4px; font-weight:600; font-size:0.9rem; text-decoration:none;">Open the dashboard →</a>
   </div>
 
   <details style="margin-bottom:12px; border:1px solid var(--rule); border-radius:4px; overflow:hidden;">
@@ -1086,12 +1131,6 @@ Please ask me questions on where the platform is at, anything you need to help w
 Failure 2: Sharing. The .jsx file couldn't be opened by the team. Two wrong StackBlitz URL formats before the right one worked. Eventually rebuilt as a standalone HTML file, which is what actually got used.</div>
       <div class="prompt-note">💡 Lesson 1: big structural rewrites of a working file are risky, small incremental edits are safer. Lesson 2: always have a sharing fallback because the fancy option often breaks.</div>
     </div>
-
-  <div class="try-it" style="margin-bottom:28px; text-align:center;">
-    <h3>👉 Show the dashboard live</h3>
-    <p style="margin-bottom:14px;">Open the CBT team briefing dashboard, three interactive slides: Big Picture / Who Does What / Our Papers.</p>
-    <a href="cbt_presentation-tracker.html" target="_blank" style="display:inline-block; background:var(--clay); color:white; padding:12px 28px; border-radius:4px; font-weight:600; font-size:0.9rem; text-decoration:none;">Open the dashboard →</a>
-  </div>
 
   <!-- Anchor 2: Discovery Project -->
   </div>
@@ -1354,7 +1393,14 @@ Ask me anything you need before starting.</div>
     <div style="padding:16px; border-top:1px solid var(--rule);">
   <div class="foundation" style="margin-bottom:28px; text-align:center;">
     <h2>What would you like next? 📊</h2>
-    <div style='position: relative; padding-bottom: 56.25%; padding-top: 35px; height: 0; overflow: hidden;'><iframe sandbox='allow-popups allow-scripts allow-same-origin allow-presentation' allowfullscreen='true' allowtransparency='true' frameborder='0' height='315' src='https://www.mentimeter.com/app/presentation/alyn53q2bei9n7dxopraytifetggc3e3/embed' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;' width='420'></iframe></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:center; margin-bottom:16px;">
+      <div style="text-align:center;">
+        <p style="font-size:0.85rem; color:var(--stone); margin-bottom:8px;">Go to</p>
+        <p style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--clay); margin-bottom:4px;">menti.com</p>
+        <p style="font-size:0.85rem; color:var(--stone);">I'll give you the code</p>
+      </div>
+      <div style='position: relative; padding-bottom: 56.25%; padding-top: 35px; height: 0; overflow: hidden;'><iframe sandbox='allow-popups allow-scripts allow-same-origin allow-presentation' allowfullscreen='true' allowtransparency='true' frameborder='0' height='315' src='https://www.mentimeter.com/app/presentation/alyn53q2bei9n7dxopraytifetggc3e3/embed' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;' width='420'></iframe></div>
+    </div>
   </div>
 
   </div>
