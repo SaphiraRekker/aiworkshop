@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carbon Budget Tracker · Team Briefing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Helvetica Neue', Arial, sans-serif; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const TEAL = "#0d7377";
+const TEAL_DARK = "#0a4a4e";
+const TEAL_LIGHT = "#14a9af";
+const ORANGE = "#e07b39";
+const GREEN = "#2d7a4f";
+const GREEN2 = "#3a8f5f";
+const AMBER = "#c49a1a";
+const GREY = "#6b7280";
+const WHITE = "#ffffff";
+
+const STATUS = {
+  done: { label: "Done", color: GREEN2 },
+  active: { label: "Active", color: TEAL },
+  priority: { label: "Priority", color: ORANGE },
+  planned: { label: "Planned", color: GREY },
+  nearDone: { label: "Near submission", color: AMBER },
+};
+
+function Badge(props) {
+  var s = STATUS[props.type];
+  return React.createElement('span', {
+    style: { fontSize: "0.6rem", fontWeight: 700, color: WHITE, background: s.color, borderRadius: 3, padding: "2px 5px", marginLeft: 6, verticalAlign: "middle", whiteSpace: "nowrap" }
+  }, s.label);
+}
+
+function UpArrow() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", margin: "4px 0" }}>
+      <svg width="18" height="22" viewBox="0 0 18 22">
+        <line x1="9" y1="22" x2="9" y2="6" stroke={TEAL} strokeWidth="2" />
+        <polygon points="9,0 3,10 15,10" fill={TEAL} />
+      </svg>
+    </div>
+  );
+}
+
+function Section(props) {
+  var [open, setOpen] = React.useState(props.defaultOpen || false);
+  var color = props.color;
+  return (
+    <div style={{ marginTop: 6 }}>
+      <div
+        onClick={function(e) { e.stopPropagation(); setOpen(!open); }}
+        style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: "3px 0", borderBottom: "1px solid " + color + "44" }}
+      >
+        <span style={{ fontSize: "0.62rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: color }}>{props.label}</span>
+        <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: color }}>{open ? "▲" : "▼"}</span>
+      </div>
+      {open && <div style={{ paddingTop: 5 }}>{props.children}</div>}
+    </div>
+  );
+}
+
+function RichBox(props) {
+  var selected = props.sel === props.id;
+  var color = props.color || TEAL;
+  var done = props.done || [];
+  var priority = props.priority || [];
+  var todo = props.todo || [];
+  var papers = props.papers || [];
+
+  return (
+    <div
+      onClick={function() { props.toggle(props.id); }}
+      style={{
+        background: selected ? "#fff8f4" : WHITE,
+        border: "2px solid " + (selected ? ORANGE : props.highlight ? color : "#d1d5db"),
+        borderRadius: 6, padding: "10px 12px", cursor: "pointer",
+        transition: "all 0.15s",
+        boxShadow: selected ? "0 0 0 3px " + ORANGE + "33" : "0 1px 3px rgba(0,0,0,0.08)",
+        minWidth: 0
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
+        <span style={{ fontWeight: 700, fontSize: "0.82rem", color: selected ? ORANGE : color }}>{props.title}</span>
+        {props.status && <Badge type={props.status} />}
+        <span style={{ marginLeft: "auto", fontSize: "0.7rem", color: selected ? ORANGE : GREY }}>{selected ? "▲" : "▼"}</span>
+      </div>
+      {!selected && props.subtitle && <div style={{ fontSize: "0.68rem", color: GREY, marginTop: 2 }}>{props.subtitle}</div>}
+      {selected && (
+        <div onClick={function(e) { e.stopPropagation(); }}>
+          {props.subtitle && <div style={{ fontSize: "0.72rem", color: GREY, margin: "4px 0 2px" }}>{props.subtitle}</div>}
+
+          {done.length > 0 && (
+            <Section label="✓ Done" color={GREEN2} defaultOpen={true}>
+              {done.map(function(d, i) {
+                return <div key={i} style={{ fontSize: "0.72rem", color: "#374151", marginBottom: 2, paddingLeft: 8, borderLeft: "2px solid " + GREEN2 }}>
+                  <span style={{ color: GREEN2, marginRight: 3 }}>✓</span>{d}
+                </div>;
+              })}
+            </Section>
+          )}
+
+          {priority.length > 0 && (
+            <Section label="★ Priority" color={ORANGE} defaultOpen={true}>
+              {priority.map(function(p, i) {
+                return <div key={i} style={{ fontSize: "0.72rem", color: "#374151", marginBottom: 2, paddingLeft: 8, borderLeft: "2px solid " + ORANGE }}>
+                  <span style={{ color: ORANGE, fontWeight: 700, marginRight: 3 }}>★</span>{p}
+                </div>;
+              })}
+            </Section>
+          )}
+
+          {todo.length > 0 && (
+            <Section label="TODO" color={AMBER} defaultOpen={false}>
+              {todo.map(function(t, i) {
+                return <div key={i} style={{ fontSize: "0.72rem", color: "#374151", marginBottom: 2, paddingLeft: 8, borderLeft: "2px solid " + AMBER }}>
+                  <span style={{ color: AMBER, fontWeight: 700, marginRight: 3 }}>TODO</span>{t}
+                </div>;
+              })}
+            </Section>
+          )}
+
+          {papers.length > 0 && (
+            <Section label="Papers" color={TEAL} defaultOpen={false}>
+              {papers.map(function(p, i) {
+                return <div key={i} style={{ fontSize: "0.7rem", marginBottom: 4, paddingLeft: 8, borderLeft: "2px solid " + TEAL }}>
+                  {p.url
+                    ? <a href={p.url} target="_blank" rel="noopener noreferrer" onClick={function(e) { e.stopPropagation(); }} style={{ color: TEAL, textDecoration: "none", borderBottom: "1px solid " + TEAL + "44" }}>{p.title} ↗</a>
+                    : <span style={{ color: "#374151" }}>{p.title}</span>
+                  }
+                  <span style={{ color: GREY, fontSize: "0.65rem", display: "block" }}>{p.ref}</span>
+                </div>;
+              })}
+            </Section>
+          )}
+
+          {props.team && (
+            <Section label="Team" color={TEAL_LIGHT} defaultOpen={false}>
+              <div style={{ fontSize: "0.7rem", color: "#374151", paddingLeft: 8 }}>{props.team}</div>
+            </Section>
+          )}
+
+          {props.rq && (
+            <Section label="Research Question" color={ORANGE} defaultOpen={false}>
+              <div style={{ fontSize: "0.7rem", color: "#374151", lineHeight: 1.5, paddingLeft: 8 }}>{props.rq}</div>
+            </Section>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Slide1() {
+  var solutions = [
+    { icon: "🔓", title: "Open & transparent", body: "All methods, code and data are freely available. Anyone can see exactly how we reach our conclusions." },
+    { icon: "🌐", title: "Context-sensitive", body: "Companies can be assessed against pathways that reflect their national context, capabilities and historical responsibility." },
+    { icon: "📐", title: "Structured pluralism", body: "Multiple legitimate methods shown side-by-side — with guardrails to prevent cherry-picking." },
+  ];
+  var stakeholders = [
+    { icon: "🏢", who: "Companies", why: "Benchmark their own performance against science-based budgets and understand where they stand relative to peers" },
+    { icon: "💼", who: "Investors", why: "Identify which companies are genuinely decarbonising vs greenwashing before allocating capital" },
+    { icon: "⚖️", who: "Litigators", why: "Peer-reviewed frameworks to assess corporate climate responsibility in court" },
+    { icon: "📋", who: "Regulators", why: "Independent tools to verify corporate climate disclosure claims" },
+    { icon: "🌱", who: "Civil society", why: "Transparent, accessible data to hold companies publicly accountable" },
+  ];
+  return (
+    <div style={{ background: WHITE, borderRadius: 10, width: "100%", maxWidth: 860, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+      <div style={{ background: TEAL_DARK, padding: "2rem 2.5rem 1.5rem", color: WHITE }}>
+        <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: TEAL_LIGHT, marginBottom: 6 }}>Carbon Budget Tracker · Team Briefing</div>
+        <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: 700, lineHeight: 1.2 }}>What are we doing,<br />and why does it matter?</h1>
+      </div>
+      <div style={{ padding: "2rem 2.5rem" }}>
+        <div style={{ marginBottom: "1.75rem" }}>
+          <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: ORANGE, fontWeight: 700, marginBottom: "0.75rem" }}>The Problem</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+
+            {/* Card 1 */}
+            <div style={{ background: "#f9fafb", borderRadius: 6, padding: "1rem", borderTop: "3px solid " + ORANGE }}>
+              <div style={{ fontSize: "1.5rem", marginBottom: 6 }}>🏭</div>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: TEAL_DARK, marginBottom: 6 }}>Companies make climate promises</div>
+              <div style={{ fontSize: "0.75rem", color: GREY, lineHeight: 1.6 }}>Thousands of companies set net zero targets. But how do we know if they're on track — or just greenwashing?</div>
+            </div>
+
+            {/* Card 2 — visual */}
+            <div style={{ background: "#f9fafb", borderRadius: 6, padding: "1rem", borderTop: "3px solid " + ORANGE }}>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: TEAL_DARK, marginBottom: 8 }}>📊 Existing tools miss what matters</div>
+              {/* Mini chart */}
+              <svg viewBox="0 0 220 90" style={{ width: "100%", marginBottom: 8 }}>
+                {/* Grid lines */}
+                <line x1="30" y1="10" x2="30" y2="72" stroke="#e5e7eb" strokeWidth="1" />
+                <line x1="30" y1="72" x2="210" y2="72" stroke="#e5e7eb" strokeWidth="1" />
+
+                {/* Cumulative area — what actually matters */}
+                <path d="M30,15 C60,18 90,30 120,45 C150,58 175,65 210,68 L210,72 L30,72 Z" fill={TEAL + "33"} />
+                <path d="M30,15 C60,18 90,30 120,45 C150,58 175,65 210,68" fill="none" stroke={TEAL} strokeWidth="1.5" />
+
+                {/* Shaded area label */}
+                <text x="100" y="62" fontSize="7" fill={TEAL} fontWeight="bold" textAnchor="middle">cumulative emissions</text>
+                <text x="100" y="70" fontSize="6" fill={TEAL} textAnchor="middle">(what determines climate outcome)</text>
+
+                {/* Target dot — what tools check */}
+                <line x1="175" y1="10" x2="175" y2="72" stroke={ORANGE} strokeWidth="1" strokeDasharray="3,2" />
+                <circle cx="175" cy="65" r="4" fill={ORANGE} />
+                <text x="176" y="20" fontSize="6.5" fill={ORANGE} fontWeight="bold">target year</text>
+                <text x="176" y="28" fontSize="6" fill={ORANGE}>← what most</text>
+                <text x="176" y="35" fontSize="6" fill={ORANGE}>tools check</text>
+
+                {/* Y axis label */}
+                <text x="8" y="45" fontSize="6" fill={GREY} transform="rotate(-90, 8, 45)" textAnchor="middle">emissions</text>
+                {/* X axis labels */}
+                <text x="30" y="80" fontSize="6" fill={GREY} textAnchor="middle">now</text>
+                <text x="210" y="80" fontSize="6" fill={GREY} textAnchor="middle">2050</text>
+              </svg>
+              <div style={{ fontSize: "0.7rem", color: GREY, lineHeight: 1.5 }}>Tools are also often too simple (one-size-fits-all) or black boxes — making it impossible to scrutinise their methodology.</div>
+            </div>
+
+            {/* Card 3 */}
+            <div style={{ background: "#f9fafb", borderRadius: 6, padding: "1rem", borderTop: "3px solid " + ORANGE }}>
+              <div style={{ fontSize: "1.5rem", marginBottom: 6 }}>⚖️</div>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: TEAL_DARK, marginBottom: 6 }}>Context is ignored</div>
+              <div style={{ fontSize: "0.75rem", color: GREY, lineHeight: 1.6 }}>A coal company in India and one in Australia face very different responsibilities. Current tools often treat them identically.</div>
+            </div>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", fontSize: "1.5rem", color: TEAL, marginBottom: "1.75rem" }}>↓</div>
+        <div style={{ marginBottom: "1.75rem" }}>
+          <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: TEAL, fontWeight: 700, marginBottom: "0.75rem" }}>Our Solution</div>
+          <div style={{ background: TEAL_DARK, borderRadius: 8, padding: "1.25rem 1.5rem", color: WHITE, marginBottom: "1rem", display: "flex", alignItems: "center", gap: "1.25rem" }}>
+            <div style={{ fontSize: "2.5rem" }}>🌍</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 4 }}>The Carbon Budget Tracker</div>
+              <div style={{ fontSize: "0.78rem", color: "#b2e0e2", lineHeight: 1.6 }}>An open-access, science-based platform that takes global carbon budgets — the total CO₂ humanity can emit to limit warming to 1.5°C, 2°C, or beyond — and works out each company's fair share. It then shows whether companies can be on track under different scenarios and methods.</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
+            {solutions.map(function(c, i) {
+              return <div key={i} style={{ background: "#f0faf9", borderRadius: 6, padding: "0.9rem", borderTop: "3px solid " + TEAL }}>
+                <div style={{ fontSize: "1.25rem", marginBottom: 5 }}>{c.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.78rem", color: TEAL_DARK, marginBottom: 4 }}>{c.title}</div>
+                <div style={{ fontSize: "0.72rem", color: GREY, lineHeight: 1.6 }}>{c.body}</div>
+              </div>;
+            })}
+          </div>
+        </div>
+        <div style={{ textAlign: "center", fontSize: "1.5rem", color: TEAL, marginBottom: "1.75rem" }}>↓</div>
+        <div>
+          <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: GREEN, fontWeight: 700, marginBottom: "0.75rem" }}>Who Uses It & Why</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.6rem" }}>
+            {stakeholders.map(function(c, i) {
+              return <div key={i} style={{ background: "#f6fff9", borderRadius: 6, padding: "0.85rem", borderTop: "3px solid " + GREEN, textAlign: "center" }}>
+                <div style={{ fontSize: "1.4rem", marginBottom: 4 }}>{c.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.78rem", color: GREEN, marginBottom: 4 }}>{c.who}</div>
+                <div style={{ fontSize: "0.68rem", color: GREY, lineHeight: 1.5 }}>{c.why}</div>
+              </div>;
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide2() {
+  var [sel, setSel] = React.useState(null);
+  function toggle(id) { setSel(sel === id ? null : id); }
+
+  var cbtCards = [
+    { label: "Prototype live", sub: "~20 cos · 2 sectors · equity methods live", status: "done" },
+    { label: "Scale to 1,000+ cos", sub: "all sectors · multiple pathways", status: "priority" },
+    { label: "Self-assessment mode", sub: "companies & stakeholders", status: "planned" },
+  ];
+
+  return (
+    <div style={{ background: WHITE, borderRadius: 10, width: "100%", maxWidth: 920, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+      <div style={{ background: TEAL_DARK, padding: "1.5rem 2.5rem", color: WHITE }}>
+        <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: TEAL_LIGHT, marginBottom: 6 }}>Carbon Budget Tracker · Research Architecture</div>
+        <h1 style={{ margin: "0 0 4px", fontSize: "1.6rem", fontWeight: 700 }}>Who is doing what — and what's next</h1>
+        <p style={{ margin: 0, fontSize: "0.75rem", color: "#b2e0e2" }}>Click any box to expand · sections inside are collapsible · <span style={{ color: "#fbbf24" }}>★ = current priority</span></p>
+      </div>
+      <div style={{ padding: "1.5rem 2rem", background: "#f4f5f6" }}>
+
+        {/* Row 1: Platform */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr", gap: "0.75rem", alignItems: "start" }}>
+          <RichBox id="governance" sel={sel} toggle={toggle}
+            title="Governance Design" subtitle="Structured pluralism guardrails" status="priority" color={ORANGE}
+            priority={["Method inclusion criteria", "Gaming prevention"]}
+            todo={["ISO/IFRS standard input"]}
+            team="FF Innovation 3 · Xin Zhang (UQ PhD) · ISO WG18"
+            rq="What governance structures enable methodological flexibility while preventing cherry-picking?" />
+          <div>
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <div style={{ display: "inline-block", background: TEAL_DARK, color: WHITE, borderRadius: 6, padding: "12px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                <div style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 2 }}>Carbon Budget Tracker</div>
+                <div style={{ fontSize: "0.7rem", color: "#b2e0e2" }}>Interactive · Open access · Science-based</div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.4rem" }}>
+              {cbtCards.map(function(c, i) {
+                return <div key={i} style={{ background: WHITE, border: "1px solid #e5e7eb", borderRadius: 4, padding: "6px 8px", textAlign: "center" }}>
+                  <Badge type={c.status} />
+                  <div style={{ fontSize: "0.68rem", fontWeight: 600, color: TEAL_DARK, marginTop: 4 }}>{c.label}</div>
+                  <div style={{ fontSize: "0.62rem", color: GREY }}>{c.sub}</div>
+                </div>;
+              })}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 6, fontSize: "0.67rem", color: GREY, fontStyle: "italic" }}>Transparent · Comparable · Budget-compliant · Open-source</div>
+          </div>
+          <RichBox id="comparison" sel={sel} toggle={toggle}
+            title="Platform Benchmarking" subtitle="How does CBT compare?" status="active"
+            done={["vs SBTi (closed, limited)", "vs TPI, WBI (open, narrow)", "vs MSCI/Bloomberg (opaque)"]}
+            priority={["Sue Lyn: measurement landscape essay (essay 1)"]}
+            papers={[
+              { title: "Do Sustainability Rating Schemes Capture Climate Goals?", ref: "Rekker et al., B&S 2021", url: "https://doi.org/10.1177/0007650319825764" },
+              { title: "Balancing simplicity and complexity through corporate emissions benchmarking", ref: "Rekker et al., NCC 2025", url: "https://doi.org/10.1038/s41558-025-02467-y" }
+            ]}
+            team="Sue Lyn Stubbs (UQ PhD/Fidelity)"
+            rq="How does CBT's structured pluralism approach improve on existing platforms? What gaps remain in the landscape?" />
+        </div>
+
+        <UpArrow />
+
+        {/* Row 2: Allocation Methods */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "0.75rem", alignItems: "start" }}>
+          <RichBox id="allocation" sel={sel} toggle={toggle} highlight
+            title="Allocation Methods" subtitle="Fair share of the carbon budget → companies" status="active"
+            done={["Absolute Contraction Approach (ACA)", "Sectoral Decarbonisation Approach (SDA)"]}
+            priority={["Paper: base year, M&A, boundary issues (concept drafted)", "Paper: historical responsibility for fossil fuel cos (concept drafted)"]}
+            todo={["Large-scale empirical comparison (1,000+ cos)", "Convergence/divergence tracking", "Gaming vulnerability testing", "Pathway dependency tracking"]}
+            papers={[
+              { title: "Measuring corporate Paris Compliance using a strict science-based approach", ref: "Rekker et al., NatComms 2022", url: "https://www.nature.com/articles/s41467-022-31143-4" },
+              { title: "Evaluating fossil fuel companies' alignment with 1.5°C climate pathways", ref: "Rekker et al., NCC 2023", url: "https://www.nature.com/articles/s41558-023-01734-0" }
+            ]}
+            team="FF Innovation 2 · Sue Lyn Stubbs (UQ PhD/Fidelity) · essay 2: legitimate methods incl. fair share"
+            rq="Which allocation methods work best under what conditions? When do methods converge vs. diverge? How sensitive are results to data quality?" />
+          <RichBox id="newmethods" sel={sel} toggle={toggle}
+            title="New Methods" subtitle="In development" status="priority" color={AMBER}
+            done={["Rao et al. (2025) One Earth — corporate equity, cement sector", "Corporate-level equity / CBDR-RC — sent to NCC, out for peer review"]}
+            priority={["Historical responsibility"]}
+            todo={["Financial & tech capability"]}
+            papers={[
+              { title: "Mainstream corporate climate methods impose inequitable burdens on emerging economies", ref: "Rao, Rekker et al., One Earth 2025", url: "https://doi.org/10.1016/j.oneear.2025.101550" },
+              { title: "Assessing the Compatibility of Transition Plans with Equity Principles", ref: "Rekker, Axelsson et al. → NCC (under review)", url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5427235" }
+            ]}
+            team="Rekker · Rao · Axelsson · Greig · Kampmann · Rose et al."
+            rq="How can equity principles be operationalised at company level? What are the trade-offs between different equity frameworks?" />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: "8rem" }}>
+          <UpArrow /><UpArrow />
+        </div>
+
+        {/* Row 3: Pathways + Company Data */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+          <RichBox id="pathways" sel={sel} toggle={toggle} highlight color={ORANGE}
+            title="Decarbonisation Pathways" subtitle="Translated to company-level budgets" status="active"
+            done={["7 pathways currently in CBT"]}
+            priority={["1.5°C country pathways integration (Climate Analytics)", "NDC/NTP integration (Rose, Rekker et al. → resubmitted to Nat Comms, under review)", "Equity-adjusted budgets"]}
+            todo={["Pathway credibility assessment"]}
+            papers={[
+              { title: "Assessing Corporate Emissions Reduction Targets Against National Transition Plans", ref: "Rose, Rekker et al. → Nat Comms (resubmitted, under review)", url: "https://ssrn.com/abstract=5108456" }
+            ]}
+            team="FF Innovation 1 · Xin Zhang (UQ PhD) governance"
+            rq="Which pathways are credible for which sectors and contexts? How do we determine when a national pathway legitimately replaces a global one?" />
+          <RichBox id="companydata" sel={sel} toggle={toggle}
+            title="Company Data" subtitle="1,000+ companies across sectors" status="active"
+            done={["142 fossil fuel cos (prototype)", "open-assets.ai infrastructure"]}
+            priority={["Cross-validation & credibility framework"]}
+            todo={["Expanding to all sectors", "InfluenceMap (fossil fuels) — may feed in", "Forward projections: reports, Net Zero Tracker, SBTi", "AI extraction from sustainability reports", "Accept-or-explain approach"]}
+            papers={[
+              { title: "Assessing corporate transition plans using a production asset-based planning approach", ref: "Kampmann & Rekker, NatComms 2026", url: "https://doi.org/10.1038/s41467-025-59430-4" }
+            ]}
+            team="Kampmann (Oxford) · Hiba Ali (Adelaide PhD) · PCP"
+            rq="What are the data requirements for different methods? How can missing data be estimated transparently?" />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+          <UpArrow /><UpArrow />
+        </div>
+
+        {/* Row 4: Sources */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
+            <div />
+            <div style={{ gridColumn: "2 / 4", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: ORANGE, textAlign: "center", padding: "2px 0", borderBottom: "2px solid " + ORANGE + "44" }}>Context-Specific Pathways</div>
+            <RichBox id="global" sel={sel} toggle={toggle}
+              title="Global Scenarios" subtitle="IPCC, IEA, NGFS" status="active"
+              done={["NGFS 1.5°C", "IEA NZE", "3 IAM pathways"]}
+              todo={["NGFS 2°C, >2°C"]}
+              team="Utrecht/IMAGE (van Vuuren)"
+              rq="Which global scenarios are appropriate baselines? How do IAM assumptions affect corporate alignment conclusions?" />
+            <RichBox id="ndcplans" sel={sel} toggle={toggle} highlight color={ORANGE}
+              title="National Plans" subtitle="NDC · NTP · 1.5°C country pathways · regional" status="priority"
+              done={["Rose, Rekker et al. → appeal sent, paper resubmitted to Nat Comms 🎉"]}
+              priority={["1.5°C country pathways (Climate Analytics) — science-based, what countries should do", "National Transition Plans / NDCs — what countries have committed to", "OneEarth model (UTS/ISF)"]}
+              todo={["Regional pathways", "Net Zero X (Princeton)"]}
+              papers={[
+                { title: "Assessing Corporate Emissions Reduction Targets Against National Transition Plans", ref: "Rose, Rekker et al. → Nat Comms (resubmitted, under review)", url: "https://ssrn.com/abstract=5108456" }
+              ]}
+              team="FF Innovation 1 · Adrien Rose (LSE) · Greig (Princeton) · UTS/ISF"
+              rq="When can national transition plans legitimately serve as corporate benchmarks? How do 1.5°C science-based country pathways differ from NDC commitments — and when should each be used?" />
+            <RichBox id="equitypaths" sel={sel} toggle={toggle} highlight color={ORANGE}
+              title="Equity Pathways" subtitle="CBDR-RC · fair share" status="priority"
+              done={["Equity-adjusted (CBDR-RC) — sent to NCC, out for peer review"]}
+              papers={[
+                { title: "Assessing the Compatibility of Transition Plans with Equity Principles", ref: "Rekker, Axelsson et al. → NCC (under review)", url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5427235" }
+              ]}
+              team="FF Innovation 1 · Rekker et al."
+              rq="How do equity-adjusted budgets differ from global pathways for companies in different development contexts?" />
+          </div>
+          <RichBox id="openassets" sel={sel} toggle={toggle}
+            title="Open-Assets Data" subtitle="open-assets.ai · asset-level · plan extraction" status="active"
+            done={["Emissions est. from production assets", "Kampmann & Rekker (2026) NatComms", "Transition plan data extraction", "NGER (Australia)"]}
+            priority={["Cross-validation & credibility framework"]}
+            todo={["InfluenceMap (fossil fuels) — may feed in", "Forward projections: reports, Net Zero Tracker, SBTi", "AI extraction from sustainability reports"]}
+            papers={[
+              { title: "Assessing corporate transition plans using a production asset-based planning approach", ref: "Kampmann & Rekker, NatComms 2026", url: "https://doi.org/10.1038/s41467-025-59430-4" },
+              { title: "Comparing extraction rates of fossil fuel producers against global climate goals", ref: "Rekker et al., NCC 2018", url: "https://www.nature.com/articles/s41558-018-0158-1" }
+            ]}
+            team="David Kampmann (Oxford) · Hiba Ali (Adelaide PhD) · FF Innovation 4 & 5"
+            rq="Can production and asset-level data provide more reliable emissions estimates? How can data credibility be assessed as disclosure expands?" />
+        </div>
+
+        <div style={{ marginTop: "1rem", padding: "10px 14px", background: WHITE, border: "1px solid #e5e7eb", borderRadius: 5, fontSize: "0.72rem", color: GREY, lineHeight: 1.6 }}>
+          <span style={{ fontWeight: 700, color: TEAL_DARK }}>Funding: </span>
+          <span style={{ color: GREEN2 }}>DECRA</span> (infrastructure + Sue Lyn) · <span style={{ color: TEAL }}>PCP</span> (company data + Kampmann/Hiba) · <span style={{ color: ORANGE }}>Future Fellowship</span> (evaluation + equity + governance, pending) · <span style={{ color: GREY }}>ARC Discovery</span> (organisational scenarios, Belinda Wade)
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide3() {
+  var groups = [
+    { statusColor: GREEN2, statusLabel: "✓ Published", papers: [
+      { title: "Do Sustainability Rating Schemes Capture Climate Goals?", authors: "Rekker, Humphrey & O'Brien", journal: "Business & Society", year: 2021, stream: "Methods", streamColor: ORANGE, note: "Review of existing tools · Best Paper Award 2021", url: "https://doi.org/10.1177/0007650319825764" },
+      { title: "Comparing extraction rates of fossil fuel producers against global climate goals", authors: "Rekker et al.", journal: "Nature Climate Change", year: 2018, stream: "Methods", streamColor: ORANGE, note: "Early foundational paper on fossil fuel pathway alignment", url: "https://www.nature.com/articles/s41558-018-0158-1" },
+      { title: "Measuring corporate Paris Compliance using a strict science-based approach", authors: "Rekker, Ives, Wade, Webb, Greig et al.", journal: "Nature Communications", year: 2022, stream: "Methods", streamColor: ORANGE, note: "Foundational CBT methodology paper · open access", url: "https://www.nature.com/articles/s41467-022-31143-4" },
+      { title: "Evaluating fossil fuel companies' alignment with 1.5°C climate pathways", authors: "Rekker et al.", journal: "Nature Climate Change", year: 2023, stream: "Methods", streamColor: ORANGE, note: "First application to fossil fuel companies · 142 cos", url: "https://www.nature.com/articles/s41558-023-01734-0" },
+      { title: "Balancing simplicity and complexity through corporate emissions benchmarking", authors: "Rekker, Axelsson, Bjørn et al.", journal: "Nature Climate Change", year: 2025, stream: "Methods", streamColor: ORANGE, note: "Structured pluralism argument", url: "https://doi.org/10.1038/s41558-025-02467-y" },
+      { title: "Mainstream corporate climate methods impose inequitable burdens on emerging economies", authors: "Rao, Rekker, Humphrey & Greig", journal: "One Earth", year: 2025, stream: "Equity", streamColor: AMBER, note: "First company-level equity empirical paper", url: "https://doi.org/10.1016/j.oneear.2025.101550" },
+      { title: "Assessing corporate transition plans using a production asset-based planning approach", authors: "Kampmann & Rekker", journal: "Nature Communications", year: 2026, stream: "Data", streamColor: GREEN2, note: "Establishes open-assets.ai methodology", url: "https://doi.org/10.1038/s41467-025-59430-4" },
+    ]},
+    { statusColor: ORANGE, statusLabel: "◎ Under Review", papers: [
+      { title: "Assessing Corporate Emissions Reduction Targets Against National Transition Plans", authors: "Rose, Rekker, Jindal & Shrimali", journal: "Nature Communications", year: null, stream: "Pathways", streamColor: ORANGE, note: "Resubmitted following appeal · preprint on SSRN", url: "https://ssrn.com/abstract=5108456" },
+      { title: "Assessing the Compatibility of Transition Plans with Equity Principles", authors: "Rekker, Axelsson, Greig, Hoffman-Riem, Hornsey, Kampmann, Rose, Shrimali, Dekker, Bjørn, Roelfsema, Stubbs, Wade, van Vuuren", journal: "Nature Climate Change", year: null, stream: "Equity", streamColor: AMBER, note: "14-author team · SSRN preprint available", url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5427235" },
+    ]},
+    { statusColor: GREY, statusLabel: "● In Progress", papers: [
+      { title: "Review of corporate climate measurement tools and platforms", authors: "Stubbs, Rekker et al.", journal: "TBD", year: null, stream: "Methods", streamColor: ORANGE, note: "Sue Lyn · PhD essay 1 · confirmation passed 🎉 · submission soon", url: null },
+      { title: "What makes a corporate climate allocation method legitimate? Including fair share approaches beyond equity", authors: "Stubbs, Rekker et al.", journal: "TBD", year: null, stream: "Methods", streamColor: ORANGE, note: "Sue Lyn · PhD essay 2", url: null },
+    ]},
+  ];
+  return (
+    <div style={{ background: WHITE, borderRadius: 10, width: "100%", maxWidth: 860, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+      <div style={{ background: TEAL_DARK, padding: "1.5rem 2.5rem", color: WHITE }}>
+        <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: TEAL_LIGHT, marginBottom: 6 }}>Carbon Budget Tracker · Publications</div>
+        <h1 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 700 }}>Our papers</h1>
+      </div>
+      <div style={{ padding: "1.75rem 2.5rem" }}>
+        {groups.map(function(group, gi) {
+          return <div key={gi} style={{ marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.6rem" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: group.statusColor }} />
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: group.statusColor }}>{group.statusLabel}</div>
+            </div>
+            {group.papers.map(function(p, pi) {
+              return <div key={pi} style={{ background: "#f9fafb", borderRadius: 6, padding: "0.9rem 1rem", marginBottom: "0.5rem", borderLeft: "3px solid " + group.statusColor }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.8rem", marginBottom: 3, lineHeight: 1.4 }}>
+                      {p.url
+                        ? <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "none", borderBottom: "1px solid " + TEAL + "44" }}>{p.title} ↗</a>
+                        : <span style={{ color: TEAL_DARK }}>{p.title}</span>
+                      }
+                    </div>
+                    <div style={{ fontSize: "0.7rem", color: GREY, marginBottom: 3 }}>{p.authors}</div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span style={{ fontSize: "0.68rem", fontStyle: "italic", color: TEAL }}>{p.journal}{p.year ? " (" + p.year + ")" : ""}</span>
+                      <span style={{ fontSize: "0.63rem", color: "#9ca3af" }}>· {p.note}</span>
+                    </div>
+                  </div>
+                  <div style={{ background: p.streamColor, color: WHITE, borderRadius: 3, padding: "2px 7px", fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>{p.stream}</div>
+                </div>
+              </div>;
+            })}
+          </div>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Slide4() {
+  var updates = [
+    {
+      date: "May 2026", meeting: "CBT Team Meeting #2", items: [
+        { type: "paper", text: "Climate Change Authority Submission — Evidence to Climate Change Authority Platform Review submitted (Rekker, Stubbs et al.)" },
+        { type: "paper", text: "Rose, Rekker et al. (national pathways) — appeal sent, paper now resubmitted to Nature Communications 🎉" },
+        { type: "paper", text: "Sue Lyn's first paper — milestone passed 🎉, draft now with Saphira for final review, ready to send shortly" },
+        { type: "contract", text: "Fossil fuel report — NGO contract ready for signing; work commences soon. Thomas Felesina supporting the paper as RA" },
+        { type: "meeting", text: "Climate Arc — meeting held" },
+        { type: "meeting", text: "ITPN — meeting with Nicolas" },
+        { type: "data", text: "Steel asset-level data — DRI share resolved. Saphira + Hiba met with David Kampmann; using Global Energy Monitor (GEM) data we can now derive a more accurate Direct Reduced Iron share per company and estimate associated emissions" },
+        { type: "platform", text: "Self-Assessment progressed — real chart vs scenario benchmarks, prefill from company data, sector-aware rates, milestone mode, save/load (still rough edges)" },
+        { type: "platform", text: "National pathways buildout — Climate Change Authority 2014 Targets & Progress Review pathway added (fills pre-2025 gap), 6 CSIRO scenarios, Climate Analytics 1.5°C, 'Sector aggregate' pseudo-company. SDA implemented for pathways with intensity+activity (CSIRO, IEA NZE, DCCEEW, Climate Analytics); Treasury and CCA 2014 silently fall back to ACA — UI labelling fix needed" },
+        { type: "platform", text: "Power historical — NEM ownership registry (1999–present, 27 generators) + pre-NGER retirement registry. Pre-2013 emissions still blocked on OpenElectricity research API access" },
+        { type: "platform", text: "Scenario assumptions — IEA NZE imported alongside NGFS, implied CO₂ budget shown on scenario cards, overshoot/CCS filter pills added" },
+        { type: "platform", text: "Homepage redesigned — narrative flow with cumulative-vs-point-in-time visual" },
+        { type: "platform", text: "About page — full publication list with links, ordered newest-first" },
+        { type: "platform", text: "carbonbudgettracker.com live on Vercel (Apr 27) 🎉" },
+        { type: "discussion", text: "For discussion: publish CCA submission on the website? — link the docx + supplementary, or convert to a blog / commentary post" },
+        { type: "discussion", text: "For discussion: publish Adrien's 1.5 °C argument (+ his other WhatsApp doc) as a blog or commentary on the website? — decide format and review/attribution" },
+        { type: "gate", text: "FF sector stays gated — even forward-looking-only publishing is risky: short recent data window can make companies look on-track while ignoring historical contributions, and stated plans may still be inconsistent with climate goals. Wait for FF / equity papers to clear review." },
+        { type: "issue", text: "Open issue: pathway base years — DCCEEW just corrected (2020 → 2025), CCA 2014 has no base-year entry, CSIRO scenarios all default to 2025; need a sweep against source data to verify each" },
+        { type: "issue", text: "Open issue: historical anchoring — pathway/actual anchor years still off in places, graphs look 'funny' — Saphira to double-check" },
+        { type: "issue", text: "Open issue: rename 'Fair share' line — current cumulative-chart counterfactual is mislabelled 'Fair share'; it's actually a grandfathered / constant-share line (anchor-year share × national sector emissions). Rename in chart, and a methodologically-sound fair-share line based on equity allocation is still TODO" },
+      ]
+    },
+    {
+      date: "April 2026", meeting: "CBT Team Meeting #1", items: [
+        { type: "paper", text: "Rekker et al. equity paper submitted to NCC & sent out for peer review — preprint on SSRN" },
+        { type: "paper", text: "Rose, Rekker et al. (national pathways) — reject & resubmit at NatComms, appeal response ready to send" },
+        { type: "platform", text: "Equity methods now live on platform — ~20 companies across 2 sectors (10 each)" },
+        { type: "team", text: "Sue Lyn passed her Confirmation milestone 🎉 — first paper submission coming soon" },
+        { type: "team", text: "Xin Zhang joined the team (CSC-funded PhD, co-supervised Oxford & Princeton)" },
+        { type: "team", text: "Thomas Felesina joined as Research Assistant" },
+        { type: "team", text: "Hiba Ali (Adelaide) joined on open-assets.ai data stream" },
+      ]
+    },
+  ];
+
+  var typeColors = {
+    paper: ORANGE,
+    platform: TEAL,
+    team: GREEN2,
+    data: AMBER,
+    contract: TEAL_LIGHT,
+    discussion: "#7c3aed",
+    gate: "#475569",
+    issue: "#dc2626",
+    meeting: TEAL_DARK,
+  };
+  var typeLabels = {
+    paper: "📄 Paper",
+    platform: "🌐 Platform",
+    team: "👤 Team",
+    data: "📊 Data",
+    contract: "🤝 Partnership",
+    discussion: "💬 Discussion",
+    gate: "🛑 Gated",
+    issue: "🚧 Open Issue",
+    meeting: "🗓 Meeting",
+  };
+
+  return (
+    <div style={{ background: WHITE, borderRadius: 10, width: "100%", maxWidth: 860, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+      <div style={{ background: TEAL_DARK, padding: "1.5rem 2.5rem", color: WHITE }}>
+        <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: TEAL_LIGHT, marginBottom: 6 }}>Carbon Budget Tracker · Changelog</div>
+        <h1 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 700 }}>Updates</h1>
+        <p style={{ margin: "4px 0 0", fontSize: "0.75rem", color: "#b2e0e2" }}>Running record of what's happened — updated each meeting</p>
+      </div>
+      <div style={{ padding: "1.75rem 2.5rem" }}>
+        {updates.map(function(u, ui) {
+          return <div key={ui} style={{ marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "0.75rem" }}>
+              <div style={{ background: TEAL_DARK, color: WHITE, borderRadius: 4, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700 }}>{u.date}</div>
+              <div style={{ fontSize: "0.72rem", color: GREY }}>{u.meeting}</div>
+            </div>
+            {u.items.map(function(item, ii) {
+              var color = typeColors[item.type] || GREY;
+              var label = typeLabels[item.type] || item.type;
+              return <div key={ii} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8, padding: "8px 10px", background: "#f9fafb", borderRadius: 5, borderLeft: "3px solid " + color }}>
+                <span style={{ background: color, color: WHITE, borderRadius: 3, padding: "2px 6px", fontSize: "0.6rem", fontWeight: 700, whiteSpace: "nowrap", marginTop: 1 }}>{label}</span>
+                <span style={{ fontSize: "0.75rem", color: "#374151", lineHeight: 1.5 }}>{item.text}</span>
+              </div>;
+            })}
+          </div>;
+        })}
+        <div style={{ marginTop: "1rem", padding: "8px 12px", background: "#f0faf9", borderRadius: 5, fontSize: "0.7rem", color: GREY, fontStyle: "italic" }}>
+          Add new entries at the top — older meetings stay below as archive.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  var [slide, setSlide] = React.useState(0);
+  var slides = ["The Big Picture", "Who Does What", "Our Papers", "Updates"];
+  return (
+    <div style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", background: "#1a1a1a", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", padding: "1.5rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
+        {slides.map(function(s, i) {
+          return <button key={i} onClick={function() { setSlide(i); }} style={{ padding: "8px 18px", borderRadius: 4, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", background: slide === i ? TEAL : "#2d2d2d", color: slide === i ? WHITE : "#888", transition: "all 0.15s" }}>
+            {i + 1}. {s}
+          </button>;
+        })}
+      </div>
+
+      {/* What's New strip */}
+      <div style={{ width: "100%", maxWidth: 920, marginBottom: "1rem", background: "#1a2e1a", border: "1px solid " + GREEN2 + "66", borderRadius: 7, padding: "0.6rem 1rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+        <div style={{ background: GREEN2, color: WHITE, borderRadius: 3, padding: "2px 7px", fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap", marginTop: 1 }}>🆕 What's New</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+          {[
+            { text: "Climate Change Authority Submission sent (Rekker, Stubbs et al.)", date: "May 2026" },
+            { text: "Steel asset-level data: DRI share resolved using Global Energy Monitor data", date: "May 2026" },
+            { text: "Self-Assessment now plotting against scenario benchmarks (still rough)", date: "May 2026" },
+            { text: "Fossil fuel report: NGO contract ready for signing — Thomas (RA) supporting paper", date: "May 2026" },
+            { text: "🎉 carbonbudgettracker.com live on Vercel", date: "Apr 2026" },
+          ].map(function(item, i) {
+            return <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: GREEN2, fontSize: "0.65rem", fontWeight: 700, whiteSpace: "nowrap" }}>{item.date}</span>
+              <span style={{ color: "#a7f3a7", fontSize: "0.72rem" }}>{item.text}</span>
+            </div>;
+          })}
+        </div>
+      </div>
+
+      {slide === 0 && <Slide1 />}
+      {slide === 1 && <Slide2 />}
+      {slide === 2 && <Slide3 />}
+      {slide === 3 && <Slide4 />}
+      {slide === 0 && (
+        <div style={{ marginTop: "1rem", background: "#1f1f1f", borderRadius: 8, padding: "1rem 1.5rem", width: "100%", maxWidth: 860, boxSizing: "border-box", textAlign: "center" }}>
+          <span style={{ fontSize: "0.85rem", color: "#888" }}>🗳️ <span style={{ color: WHITE, fontWeight: 600 }}>Team vote:</span> Should this be our website homepage? — we'll vote together in the meeting.</span>
+        </div>
+      )}
+      <div style={{ marginTop: "1rem", fontSize: "0.7rem", color: "#555" }}>
+        {slide + 1} / {slides.length} · Carbon Budget Tracker · UQ Business School
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
