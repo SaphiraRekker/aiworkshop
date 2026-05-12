@@ -603,24 +603,26 @@ function App() {
         })}
       </div>
 
-      {/* What's New strip */}
-      <div style={{ width: "100%", maxWidth: 920, marginBottom: "1rem", background: "#1a2e1a", border: "1px solid " + GREEN2 + "66", borderRadius: 7, padding: "0.6rem 1rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-        <div style={{ background: GREEN2, color: WHITE, borderRadius: 3, padding: "2px 7px", fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap", marginTop: 1 }}>🆕 What's New</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
-          {[
-            { text: "Climate Change Authority Submission sent (Rekker, Stubbs et al.)", date: "May 2026" },
-            { text: "Steel asset-level data: DRI share resolved using Global Energy Monitor data", date: "May 2026" },
-            { text: "Self-Assessment now plotting against scenario benchmarks (still rough)", date: "May 2026" },
-            { text: "Fossil fuel report: NGO contract ready for signing — Thomas (RA) supporting paper", date: "May 2026" },
-            { text: "🎉 carbonbudgettracker.com live on Vercel", date: "Apr 2026" },
-          ].map(function(item, i) {
-            return <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ color: GREEN2, fontSize: "0.65rem", fontWeight: 700, whiteSpace: "nowrap" }}>{item.date}</span>
-              <span style={{ color: "#a7f3a7", fontSize: "0.72rem" }}>{item.text}</span>
-            </div>;
-          })}
+      {/* What's New strip — only shown on Updates tab */}
+      {slide === 3 && (
+        <div style={{ width: "100%", maxWidth: 920, marginBottom: "1rem", background: "#1a2e1a", border: "1px solid " + GREEN2 + "66", borderRadius: 7, padding: "0.6rem 1rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+          <div style={{ background: GREEN2, color: WHITE, borderRadius: 3, padding: "2px 7px", fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap", marginTop: 1 }}>🆕 What's New</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+            {[
+              { text: "Climate Change Authority Submission sent (Rekker, Stubbs et al.)", date: "May 2026" },
+              { text: "Steel asset-level data: DRI share resolved using Global Energy Monitor data", date: "May 2026" },
+              { text: "Self-Assessment now plotting against scenario benchmarks (still rough)", date: "May 2026" },
+              { text: "Fossil fuel report: NGO contract ready for signing — Thomas (RA) supporting paper", date: "May 2026" },
+              { text: "🎉 carbonbudgettracker.com live on Vercel", date: "Apr 2026" },
+            ].map(function(item, i) {
+              return <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ color: GREEN2, fontSize: "0.65rem", fontWeight: 700, whiteSpace: "nowrap" }}>{item.date}</span>
+                <span style={{ color: "#a7f3a7", fontSize: "0.72rem" }}>{item.text}</span>
+              </div>;
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {slide === 0 && <Slide1 />}
       {slide === 1 && <Slide2 />}
